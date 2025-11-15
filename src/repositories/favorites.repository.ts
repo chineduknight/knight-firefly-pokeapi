@@ -9,4 +9,6 @@ export interface FavoritesRepository {
   isFavorite(pokemonId: number): Promise<boolean>;
   addFavorite(attrs: FavoritePokemonAttrs): Promise<FavoritePokemon>;
   removeFavorite(pokemonId: number): Promise<void>;
+  findByPokemonId(pokemonId: number): Promise<FavoritePokemon | null>;
+  createFavorite(attrs: FavoritePokemonAttrs): Promise<FavoritePokemon>;
 }
