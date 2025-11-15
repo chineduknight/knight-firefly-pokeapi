@@ -1,6 +1,7 @@
 import {
   FavoritePokemon,
   FavoritePokemonAttrs,
+  FavoritePokemonDoc,
   FavoritePokemonModel,
 } from "../models/favorites.model";
 import { FavoritesRepository } from "./favorites.repository";
@@ -17,7 +18,13 @@ export class MongoFavoritesRepository implements FavoritesRepository {
       updatedAt: doc.updatedAt,
     }));
   }
-
+  async createFavorite(
+    attrs: FavoritePokemonAttrs
+  ): Promise<FavoritePokemonDoc> {
+    const favorite = new FavoritePokemonModel(attrs);
+    await favorite.save();
+    return favorite;
+  }
   async getIds(): Promise<number[]> {
     const docs = await FavoritePokemonModel.find({}, { pokemonId: 1 }).lean();
     return docs.map((doc) => doc.pokemonId);
@@ -26,6 +33,9 @@ export class MongoFavoritesRepository implements FavoritesRepository {
   async isFavorite(pokemonId: number): Promise<boolean> {
     const count = await FavoritePokemonModel.countDocuments({ pokemonId });
     return count > 0;
+  }
+  async findByPokemonId(pokemonId: number): Promise<FavoritePokemonDoc | null> {
+    return FavoritePokemonModel.findOne({ pokemonId }).exec();
   }
 
   async addFavorite(attrs: FavoritePokemonAttrs): Promise<FavoritePokemon> {

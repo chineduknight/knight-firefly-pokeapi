@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { FavoritesService } from "../services/favorites.service";
 import { MongoFavoritesRepository } from "../repositories/favorites.mongo.repository";
-import { FavoritePokemonAttrs } from "../models/favorites.model";
+import {
+  AddFavoriteRequestBody,
+  FavoritePokemonAttrs,
+} from "../models/favorites.model";
+import { parsePositiveInt } from "../utils/validation";
 
 const favoritesRepo = new MongoFavoritesRepository();
 const favoritesService = new FavoritesService(favoritesRepo);
@@ -25,28 +29,14 @@ export const addFavorite = async (
   next: NextFunction
 ) => {
   try {
-    const body = req.body as Partial<FavoritePokemonAttrs>;
+    const body = req.body as AddFavoriteRequestBody;
+    const pokemonId = parsePositiveInt(body.pokemonId, "pokemonId");
 
-    if (
-      !body ||
-      typeof body.pokemonId !== "number" ||
-      !body.name ||
-      !body.spriteUrl ||
-      !Array.isArray(body.types)
-    ) {
-      return res.status(400).json({ message: "Invalid favorite payload" });
-    }
+    const favorite = await favoritesService.addFavorite(pokemonId);
 
-    const favorite = await favoritesService.addFavorite({
-      pokemonId: body.pokemonId,
-      name: body.name,
-      spriteUrl: body.spriteUrl,
-      types: body.types,
-    });
-
-    res.status(201).json(favorite);
-  } catch (error) {
-    next(error);
+    res.status(201).json({ success: true, data: favorite });
+  } catch (err) {
+    next(err);
   }
 };
 

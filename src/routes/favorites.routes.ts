@@ -7,8 +7,8 @@ import {
 
 const router = Router();
 
-router.get("/", getFavorites); // GET /api/favorites
-router.post("/", addFavorite); // POST /api/favorites
-router.delete("/:pokemonId", removeFavorite); // DELETE /api/favorites/25
+router.get("/", getFavorites);
+router.post("/", addFavorite);
+router.delete("/:pokemonId", removeFavorite);
 
 export default router;

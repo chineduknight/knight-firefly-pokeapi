@@ -1,8 +1,8 @@
-// src/utils/pokeapiToDomain.mapper.ts
 import {
   PokemonDetails,
   PokemonEvolution,
   PokemonListItem,
+  PokemonListResponse,
 } from "../models/pokemon.types";
 import {
   PokeApiListResponse,
@@ -13,11 +13,19 @@ import {
 
 export const buildSpriteUrl = (id: number): string =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-
+interface MapPokemonListOptions {
+  offset: number;
+  limit: number;
+  maxTotal: number;
+}
 export const mapPokemonListResponse = (
   apiResponse: PokeApiListResponse,
-  favoriteIds: number[]
-): { items: PokemonListItem[]; total: number } => {
+  favoriteIds: number[],
+  options: MapPokemonListOptions
+): PokemonListResponse => {
+  const { offset, limit, maxTotal } = options;
+  const total = Math.min(apiResponse.count, maxTotal);
+
   const items = apiResponse.results.map((item) => {
     const id = extractIdFromUrl(item.url);
     return {
@@ -27,10 +35,18 @@ export const mapPokemonListResponse = (
       isFavorite: favoriteIds.includes(id),
     };
   });
+  const hasNextPage = offset + limit < total;
+  const nextOffset = hasNextPage ? offset + limit : null;
 
   return {
     items,
-    total: apiResponse.count,
+    total,
+    page: {
+      offset,
+      limit,
+      hasNextPage,
+      nextOffset,
+    },
   };
 };
 
@@ -67,13 +83,12 @@ export const mapEvolutionChain = (
     const id = extractIdFromUrl(url);
     result.push({ id, name });
 
-    // Recurse into all evolution branches (handles branched evolutions like Eevee)
+    // Recurse into all evolution branches
     node.evolves_to.forEach(visitNode);
   };
 
   visitNode(evolutionChain.chain);
 
-  // Optional: de-duplicate in case of weird data or shared branches
   const unique = new Map<number, PokemonEvolution>();
   for (const evo of result) {
     if (!unique.has(evo.id)) {

@@ -1,4 +1,3 @@
-// src/services/pokemon.service.ts
 import { FavoritesRepository } from "../repositories/favorites.repository";
 import {
   fetchEvolutionChain,
@@ -12,17 +11,31 @@ import {
   mapPokemonListResponse,
 } from "../utils/pokeapiToDomain.mapper";
 import { PokemonDetails, PokemonListResponse } from "../models/pokemon.types";
+import { config } from "../config/env";
 
+const MAX_POKEMON = config.maxPokemon;
+interface GetPokemonListParams {
+  offset: number;
+  limit: number;
+}
 export class PokemonService {
   constructor(private readonly favoritesRepo: FavoritesRepository) {}
 
-  async getPokemonList(limit: number): Promise<PokemonListResponse> {
+  async getPokemonList(
+    params: GetPokemonListParams
+  ): Promise<PokemonListResponse> {
+    const { offset, limit } = params;
+
     const [apiList, favoriteIds] = await Promise.all([
-      fetchPokemonList(limit),
+      fetchPokemonList({ offset, limit }),
       this.favoritesRepo.getIds(),
     ]);
 
-    return mapPokemonListResponse(apiList, favoriteIds);
+    return mapPokemonListResponse(apiList, favoriteIds, {
+      offset,
+      limit,
+      maxTotal: MAX_POKEMON,
+    });
   }
 
   async getPokemonDetails(id: number): Promise<PokemonDetails> {

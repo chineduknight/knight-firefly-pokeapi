@@ -1,5 +1,7 @@
-// src/models/favorites.model.ts
 import { Schema, model, Document } from "mongoose";
+export interface AddFavoriteRequestBody {
+  pokemonId: number;
+}
 
 export interface FavoritePokemonAttrs {
   pokemonId: number;

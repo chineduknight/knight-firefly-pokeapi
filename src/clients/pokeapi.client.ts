@@ -45,12 +45,16 @@ const api = axios.create({
   baseURL: config.pokeApiBaseUrl,
 });
 
-export const fetchPokemonList = async (
-  limit: number
-): Promise<PokeApiListResponse> => {
+export const fetchPokemonList = async (params: {
+  offset: number;
+  limit: number;
+}): Promise<PokeApiListResponse> => {
+  const { offset, limit } = params;
+
   const response = await api.get<PokeApiListResponse>("/pokemon", {
-    params: { limit, offset: 0 },
+    params: { limit, offset },
   });
+
   return response.data;
 };
 
