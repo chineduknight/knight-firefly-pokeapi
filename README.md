@@ -141,3 +141,6 @@ curl -X DELETE http://localhost:4000/api/favorites/25
 
 See you in the frontend
 Check it out on this link
+[Github Pokémon App](https://github.com/chineduknightknight-firefly-pokemonapp)
+
+Access my site at [Knight Pokémon App](https://knigt-firefly-pokeapp.netlify.app/).
